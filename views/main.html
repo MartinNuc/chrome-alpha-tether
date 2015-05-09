@@ -1,0 +1,6 @@
+Select camera:<br>
+
+<select ng-model="selectedCamera" ng-options="item.name for item in availableCameras"></select>
+
+<button class="btn" ng-click="setCamera(selectedCamera)">Use this</button>
+<button class="btn" ng-click="findCamera()">Find camera</button>

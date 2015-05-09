@@ -1,0 +1,23 @@
+{
+  "name": "Chrome Alpha Tether",
+  "description": "Preview shot in your browser right after pressing a trigger on camera. Supported cameras: Sony A7ii",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "app": {
+    "background": {
+      "scripts": [
+        "scripts/background.js"
+      ]
+    }
+  },
+  "sockets": {
+    "udp": {
+      "bind": "*",
+      "send": "*",
+      "multicastMembership": ""
+    }
+  },
+  "permissions": [
+    "http://*/"
+  ]
+}

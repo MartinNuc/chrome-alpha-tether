@@ -1,0 +1,9 @@
+body {
+    background-color: black;
+    color: white;
+}
+
+#image {
+    width: 100%;
+    height: 100%;
+}

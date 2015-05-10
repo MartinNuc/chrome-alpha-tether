@@ -13,8 +13,7 @@ angular
         'ngRoute',
         'ngSanitize',
         'ui.bootstrap',
-        'dialogs.main',
-        'ngMock'
+        'dialogs.main'
     ])
     .config(function ($routeProvider, $httpProvider) {
         $httpProvider.defaults.headers.post = {};

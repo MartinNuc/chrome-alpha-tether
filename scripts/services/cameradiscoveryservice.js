@@ -1,36 +1,40 @@
 var socketId;
 var socket = chrome.sockets.udp;
 
-
-chrome.sockets.udp.onReceive.addListener(function(info) {
-    console.log(info);
-});
-
-chrome.sockets.udp.onReceiveError.addListener(function (info) {
-    console.log("onReceiveError resultCode=" + info.resultCode);
-});
-
 angular.module('alphatetherApp')
-    .service('CameraDiscoveryService', function () {
+    .service('CameraDiscoveryService', function (SsdpLocationParser) {
         var service = {};
 
         var searchRequest = 'M-SEARCH * HTTP/1.1 \r\n' +
             'HOST: 239.255.255.250:1900 \r\n' +
             'MAN: "ssdp:discover" \r\n' +
-            'MX: 1 \r\n' +
+            'MX: 1\r\n' +
             'ST: urn:schemas-sony-com:service:ScalarWebAPI:1\r\n\r\n';
-
-
         service.initialize = function (onInitializedCallback) {
             socket.create({}, function (socketInfo) {
                 socketId = socketInfo.socketId;
-                socket.setMulticastTimeToLive(socketId, 100, function () {
-                    socket.setMulticastLoopbackMode(socketId, true, function () {
+                socket.setMulticastTimeToLive(socketId, 16, function () {
+                    socket.setMulticastLoopbackMode(socketId, false, function () {
                         socket.bind(socketId, "0.0.0.0", 1900, function () {
+                            var info = socket.getInfo(socketId, function(info) {
+                                console.info(info);
+                            });
+                            chrome.system.network.getNetworkInterfaces(function(interfaces){
+                                console.log(interfaces);
+                            });
                             socket.joinGroup(socketId, '239.255.255.250', function () {
                                 if (onInitializedCallback) {
                                     onInitializedCallback.call();
                                 }
+                            });
+                            chrome.sockets.udp.onReceive.addListener(function(info) {
+                                info.data = ab2t(info.data);
+                                console.info(info);
+                                SsdpLocationParser.parseLocationFromSsdpResponse(info.data);
+                            });
+
+                            chrome.sockets.udp.onReceiveError.addListener(function (info) {
+                                console.log("onReceiveError resultCode=" + info.resultCode);
                             });
                         });
                     });
@@ -49,6 +53,8 @@ angular.module('alphatetherApp')
         service.listen = function (onResponseRecievedCallback) {
         };
 
+        return service;
+
         function str2ab(str) {
             var buffer = new ArrayBuffer(str.length);
             var view = new DataView(buffer);
@@ -66,6 +72,4 @@ angular.module('alphatetherApp')
             }
             return str;
         }
-
-        return service;
     });

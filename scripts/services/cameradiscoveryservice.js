@@ -5,12 +5,12 @@ angular.module('alphatetherApp')
     .service('CameraDiscoveryService', function (SsdpLocationParser) {
         var service = {};
 
-        var searchRequest = 'M-SEARCH * HTTP/1.1 \r\n' +
-            'HOST: 239.255.255.250:1900 \r\n' +
-            'MAN: "ssdp:discover" \r\n' +
+        var searchRequest = 'M-SEARCH * HTTP/1.1\r\n' +
+            'HOST: 239.255.255.250:1900\r\n' +
+            'MAN: "ssdp:discover"\r\n' +
             'MX: 1\r\n' +
             'ST: urn:schemas-sony-com:service:ScalarWebAPI:1\r\n\r\n';
-        service.initialize = function (onInitializedCallback) {
+        service.initialize = function (onInitializedCallback, onResponseRecievedCallback) {
             socket.create({}, function (socketInfo) {
                 socketId = socketInfo.socketId;
                 socket.setMulticastTimeToLive(socketId, 16, function () {
@@ -18,9 +18,6 @@ angular.module('alphatetherApp')
                         socket.bind(socketId, "0.0.0.0", 1900, function () {
                             var info = socket.getInfo(socketId, function(info) {
                                 console.info(info);
-                            });
-                            chrome.system.network.getNetworkInterfaces(function(interfaces){
-                                console.log(interfaces);
                             });
                             socket.joinGroup(socketId, '239.255.255.250', function () {
                                 if (onInitializedCallback) {
@@ -30,7 +27,8 @@ angular.module('alphatetherApp')
                             chrome.sockets.udp.onReceive.addListener(function(info) {
                                 info.data = ab2t(info.data);
                                 console.info(info);
-                                SsdpLocationParser.parseLocationFromSsdpResponse(info.data);
+                                var xmlUrl = SsdpLocationParser.parseLocationFromSsdpResponse(info.data);
+                                onResponseRecievedCallback.call(xmlUrl);
                             });
 
                             chrome.sockets.udp.onReceiveError.addListener(function (info) {

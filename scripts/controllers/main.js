@@ -8,26 +8,35 @@
  * Controller of the alphatetherApp
  */
 angular.module('alphatetherApp')
-    .controller('MainCtrl', function ($scope, $location, CameraImageService, CameraDiscoveryService) {
+    .controller('MainCtrl', function ($scope, $http, $location, CameraImageService, CameraDiscoveryService) {
 
-        CameraDiscoveryService.initialize(function () {
-            CameraDiscoveryService.sendSearchRequest();
-        });
+        loadXml("http://192.168.122.1:61000/scalarwebapi_dd.xml");
 
+        function loadXml(xmlLocation) {
+            $http.get(xmlLocation).success(function (response) {
+                $scope.setCamera('http://192.168.122.1:8080');
+            }).error(function () {
+                findCameraBySSDP();
+            });
+        }
+
+        function findCameraBySSDP() {
+            CameraDiscoveryService.initialize(function () {
+                CameraDiscoveryService.sendSearchRequest();
+            }, function (xmlLocation) {
+                if (xmlLocation != null) {
+                    loadXml(xmlLocation);
+                    console.debug("XML Location======> " + xmlLocation);
+                }
+            });
+        }
 
         $scope.findCamera = function () {
             CameraDiscoveryService.sendSearchRequest();
         };
 
-        /*console.log(cameras);
-         $scope.availableCameras = [
-         {name: 'A7ii', endpoint: 'http://192.168.122.1:8080'}
-         ];
-         $scope.selectedCamera = $scope.availableCameras[0];*/
-
-        $scope.setCamera = function (camera) {
-            console.info(camera);
-            CameraImageService.setCamera(camera);
+        $scope.setCamera = function (endpoint) {
+            CameraImageService.setCamera({endpoint: endpoint});
             $location.path('/camera');
         };
     });

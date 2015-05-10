@@ -20,7 +20,7 @@ angular.module('alphatetherApp')
                 if (response.result[0] === 0) {
                     $interval(checkForNewImage, 1500);
                 } else {
-                    console.log(response);
+                    console.debug(response);
                 }
             }).error(function () {
                 error('Error starting camera');
@@ -31,11 +31,17 @@ angular.module('alphatetherApp')
 
         function loadImage(takePictureUrl) {
             $scope.imageSource = takePictureUrl;
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', takePictureUrl, true);
+            xhr.responseType = 'blob';
+            xhr.onload = function(e) {
+                $scope.imageSource = window.URL.createObjectURL(this.response);
+            };
+            xhr.send();
         }
 
         function checkForNewImage() {
             CameraImageService.checkForNewImage().success(function (response) {
-                console.log(response.result);
                 if (response.result && response.result[5] && response.result[5][0] && response.result[5][0].takePictureUrl) {
                     loadImage(response.result[5][0].takePictureUrl[0]);
                 }

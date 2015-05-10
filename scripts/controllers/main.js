@@ -1,5 +1,11 @@
 'use strict';
 
+chrome.app.window.current().outerBounds.width = screen.width;
+chrome.app.window.current().outerBounds.height = screen.height;
+chrome.app.window.current().innerBounds.width = screen.width;
+chrome.app.window.current().innerBounds.height = screen.height;
+chrome.app.window.current().maximize();
+
 /**
  * @ngdoc function
  * @name alphatetherApp.controller:MainCtrl
@@ -33,6 +39,10 @@ angular.module('alphatetherApp')
 
         $scope.findCamera = function () {
             CameraDiscoveryService.sendSearchRequest();
+        };
+
+        $scope.connectToStaticAddress = function () {
+            loadXml("http://192.168.122.1:61000/scalarwebapi_dd.xml");
         };
 
         $scope.setCamera = function (endpoint) {

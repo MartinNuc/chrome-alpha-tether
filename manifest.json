@@ -18,6 +18,7 @@
     }
   },
   "permissions": [
-    "http://*/"
+    "http://*/",
+    "fullscreen"
   ]
 }
